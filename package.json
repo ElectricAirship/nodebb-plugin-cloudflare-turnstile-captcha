@@ -1,62 +1,62 @@
 {
-  "name": "nodebb-plugin-spam-be-gone",
-  "version": "2.3.1",
-  "description": "anti spam using both Google Recaptcha, Akismet.com, StopForumSpam.com & ProjectHoneyPot.com",
-  "main": "library.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/akhoury/nodebb-plugin-spam-be-gone"
-  },
-  "keywords": [
-    "nodebb",
-    "plugin",
-    "spam",
-    "recaptcha",
-    "stopforumspam",
-    "akismet",
-    "honeypot",
-    "projecthoneypot",
-    "antispam"
-  ],
-  "author": {
-    "name": "Aziz khoury",
-    "email": "bentael@gmail.com"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/akhoury/nodebb-plugin-spam-be-gone"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npx lint-staged",
-      "commit-msg": "npx commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ]
-  },
-  "dependencies": {
-    "async": "^3.2.0",
-    "hcaptcha": "^0.0.1",
-    "project-honeypot": "~0.0.0",
-    "stopforumspam": "^1.3.8"
-  },
-  "nbbpm": {
-    "compatibility": "^4.0.0"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-angular": "^8.3.4",
-    "eslint": "8.57.1",
-    "eslint-config-nodebb": "0.2.1",
-    "eslint-plugin-import": "2.31.0",
-    "husky": "^4.2.5",
-    "lint-staged": "^10.2.2"
-  }
+	"name": "nodebb-plugin-cloudflare-turnstile-captcha",
+	"version": "2.3.1",
+	"description": "anti spam using cloudflare recaptcha",
+	"main": "library.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ElectricAirship/nodebb-plugin-cloudflare-turnstile-captcha"
+	},
+	"keywords": [
+		"nodebb",
+		"plugin",
+		"spam",
+		"cloudflare",
+		"captcha",
+		"turnstile",
+		"turnstile",
+		"antibot",
+		"antispam"
+	],
+	"author": {
+		"name": "Ben McGraw",
+		"email": "ben.mcgraw@gmail.com"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/ElectricAirship/nodebb-plugin-cloudflare-turnstile-captcha/issues"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "npx lint-staged",
+			"commit-msg": "npx commitlint -E HUSKY_GIT_PARAMS"
+		}
+	},
+	"lint-staged": {
+		"*.js": [
+			"eslint --fix",
+			"git add"
+		]
+	},
+	"dependencies": {
+		"async": "^3.2.0",
+		"hcaptcha": "^0.0.1",
+		"project-honeypot": "~0.0.0",
+		"stopforumspam": "^1.3.8"
+	},
+	"nbbpm": {
+		"compatibility": "^4.0.0"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^8.3.5",
+		"@commitlint/config-angular": "^8.3.4",
+		"eslint": "8.57.1",
+		"eslint-config-nodebb": "0.2.1",
+		"eslint-plugin-import": "2.31.0",
+		"husky": "^4.2.5",
+		"lint-staged": "^10.2.2"
+	}
 }
