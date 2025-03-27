@@ -1,0 +1,15 @@
+{
+	"something-went-wrong": "Something went wrong",
+	"not-allowed": "You are not allowed to perform this action",
+	"cant-report-admin": "You can't report an admin as spammer",
+	"user-reported": "User reported!",
+	"captcha-not-verified": "Captcha not verified, are you a robot?",
+	"admin-topic-start": "This plugin uses",
+	"admin-topic-end": "pull requests or ideas at the",
+	"enable": "Enable",
+	"enable-turnstile-login": "Enable Turnstyle on login page as well",
+	"not-enabled": "Cloudflare Turnstile Captcha is not enabled",
+	"site-key-not-set": "Cloudflare Turnstile Captcha Site Key is not set, get one from cloudflare.com/application-services/products/turnstile/",
+	"admin-get-key": "To check every user registration. You need a private and a public key, get yours from cloudflare.com/application-services/products/turnstile/",
+	"admin-privacy-reminder": "Keep your private key private"
+}

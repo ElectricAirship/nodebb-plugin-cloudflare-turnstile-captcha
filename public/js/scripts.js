@@ -1,7 +1,5 @@
 "use strict";
 
-/* global grecaptcha */
-
 $(function () {
   var pluginName = "cloudflare-turnstile-captcha";
 
@@ -16,11 +14,9 @@ $(function () {
   }
 
   window.onloadTurnstileCallback = function () {
-    turnstile.render("#example-container", {
-      sitekey: "SITEKEY HERE",
-      callback: function (token) {
-        console.log(`Challenge Success ${token}`);
-      },
+    turnstile.render(`#${ajaxify.data.cloudflareTurnstileArgs.targetId}`, {
+      sitekey: ajaxify.data.cloudflareTurnstileArgs.publicKey,
+      callback: function (token) {},
     });
   };
 
@@ -94,20 +90,4 @@ $(function () {
         break;
     }
   });
-});
-
-window.__nodebbCloudflareTurnstileCaptcha__ = function () {
-  var args = ajaxify.data.cloudflareTurnstileArgs;
-  alert("hello from __nodebbCloudflareTurnstileCaptcha__ - go check the args");
-  if (!args) {
-    return;
-  }
-};
-
-$(window).on("action:script.load", function (evt, data) {
-  // Inject register.tpl client-side script
-  if (["register", "login"].includes(data.tpl_url)) {
-    // data.scripts.push("cloudflare-turnstile-captcha/hcaptcha");
-    alert(`register?  login?  we don't need hcaptcha...`);
-  }
 });

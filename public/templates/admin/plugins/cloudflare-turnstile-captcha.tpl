@@ -1,6 +1,5 @@
 <div class="acp-page-container">
 	<!-- IMPORT admin/partials/settings/header.tpl -->
-
 	<div>
 		<div class="alert alert-info mb-0 text-xs">
 			<p>
@@ -20,7 +19,7 @@
 		<div id="spy-container" class="col-12 px-0 mb-4" tabindex="0">
 			<ul class="nav nav-tabs mb-3" role="tablist">
 				<li role="presentation" class="nav-item"><a class="nav-link active" href="#recaptcha" aria-controls="recaptcha"
-						role="tab" data-bs-toggle="tab">Google reCAPTCHA</a></li>
+						role="tab" data-bs-toggle="tab">Cloudflare Turnstile</a></li>
 			</ul>
 
 			<form role="form" class="{nbbId}-settings">
@@ -37,7 +36,7 @@
 											Turnstile</label>
 									</div>
 									<p class="form-text">
-										[[cloudflare-turnstile-captcha:recaptcha-topic-1]]<a target="_blank"
+										[[cloudflare-turnstile-captcha:admin-get-key]]<a target="_blank"
 											href="https://www.cloudflare.com/application-services/products/turnstile/">cloudflare.com/application-services/products/turnstile</a>
 									</p>
 
@@ -53,7 +52,7 @@
 									</div>
 
 									<p class="form-text">
-										[[cloudflare-turnstile-captcha:recaptcha-topic-2]]
+										[[cloudflare-turnstile-captcha:admin-privacy-reminder]]
 									</p>
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="loginTurnstileEnabled"

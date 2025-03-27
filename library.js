@@ -16,7 +16,7 @@ const Plugin = module.exports;
 pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, "");
 Plugin.nbbId = pluginData.nbbId;
 
-const cloudflareTurnstileArgs = {};
+let cloudflareTurnstileArgs = {};
 let pluginSettings = {}; // Add this line to declare pluginSettings
 
 Plugin.middleware = {};
@@ -36,13 +36,13 @@ Plugin.middleware.isAdminOrGlobalMod = function (req, res, next) {
 };
 
 Plugin.middleware.cloudflareTurnstileCaptcha = function (req, res, next) {
-  if (!pluginSettings.stopforumspamEnabled) {
+  if (!pluginSettings.cloudflareTurnstileEnabled) {
     return res
       .status(400)
       .send({ message: "[[cloudflare-turnstile-captcha:not-enabled]]" });
   }
 
-  if (!pluginSettings.stopforumspamApiKey) {
+  if (!pluginSettings.turnstileSiteKey) {
     return res.status(400).send({
       message: "[[cloudflare-turnstile-captcha:sfs-api-key-not-set]]",
     });
@@ -52,6 +52,7 @@ Plugin.middleware.cloudflareTurnstileCaptcha = function (req, res, next) {
 
 Plugin.load = async function (params) {
   const settings = await Meta.settings.get(pluginData.nbbId);
+
   if (!settings) {
     winston.warn(
       `[plugins/${pluginData.nbbId}] Settings not set or could not be retrieved!`
@@ -61,16 +62,12 @@ Plugin.load = async function (params) {
 
   if (settings.cloudflareTurnstileEnabled === "on") {
     if (settings.turnstileSiteKey && settings.turnstileSecretKey) {
-      alert("setting cloudflareTurnstileArgs");
       cloudflareTurnstileArgs = {
         addLoginRecaptcha: settings.loginTurnstileEnabled === "on",
         publicKey: settings.turnstileSiteKey,
         targetId: `${pluginData.nbbId}-recaptcha-target`,
         options: {
-          // theme: settings.recaptchaTheme || 'clean',
-          // todo: switch to custom theme, issue#9
           theme: "clean",
-
           hl: (Meta.config.defaultLang || "en").toLowerCase(),
           tabindex: settings.recaptchaTabindex || 0,
         },
@@ -87,18 +84,37 @@ Plugin.load = async function (params) {
     renderAdmin
   );
 
+  // Add the missing handlers for these routes
   params.router.post(
     `/api/user/:userslug/${pluginData.nbbId}/report`,
-    Plugin.middleware.isAdminOrGlobalMod,
-    Plugin.middleware.cloudflareTurnstileCaptcha,
-    Plugin.report
+    [
+      Plugin.middleware.isAdminOrGlobalMod,
+      Plugin.middleware.cloudflareTurnstileCaptcha,
+    ],
+    async (req, res) => {
+      try {
+        // Implement your report handling logic here
+        res.json({ success: true });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    }
   );
 
   params.router.post(
     `/api/user/:username/${pluginData.nbbId}/report/queue`,
-    Plugin.middleware.isAdminOrGlobalMod,
-    Plugin.middleware.cloudflareTurnstileCaptcha,
-    Plugin.reportFromQueue
+    [
+      Plugin.middleware.isAdminOrGlobalMod,
+      Plugin.middleware.cloudflareTurnstileCaptcha,
+    ],
+    async (req, res) => {
+      try {
+        // Implement your report queue handling logic here
+        res.json({ success: true });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    }
   );
 };
 
@@ -111,8 +127,8 @@ async function renderAdmin(req, res) {
   });
 }
 
+// called when you hit ANY admin page
 Plugin.appendConfig = async (data) => {
-  alert("Plugin.appendConfig");
   data["cloudflare-turnstile-captcha"] = {};
   const { cloudflareTurnstileEnabled, turnstileSiteKey } =
     await Meta.settings.get("cloudflare-turnstile-captcha");
@@ -126,9 +142,8 @@ Plugin.appendConfig = async (data) => {
   return data;
 };
 
+// called when you hit the public register/login page and... add the captcha!
 Plugin.addCaptcha = async (data) => {
-  debugger;
-  alert("addCaptcha");
   function addCaptchaData(templateData, loginCaptchaEnabled, captcha) {
     if (templateData.regFormEntry && Array.isArray(templateData.regFormEntry)) {
       templateData.regFormEntry.push(captcha);
@@ -158,6 +173,7 @@ Plugin.addCaptcha = async (data) => {
 
   const { cloudflareTurnstileEnabled, logincloudflareTurnstileEnabled } =
     await Meta.settings.get("cloudflare-turnstile-captcha");
+
   if (cloudflareTurnstileEnabled === "on") {
     if (data.templateData) {
       addCaptchaData(
@@ -194,19 +210,72 @@ Plugin.checkLogin = async function (data) {
 };
 
 Plugin._cloudflareTurnstileCheck = async (userData) => {
-  alert("Plugin._cloudflareTurnstileCheck");
-
   // all this needs to be replaced
-  const { cloudflareTurnstileEnabled, hCaptchaSecretKey } =
+  const { cloudflareTurnstileEnabled, turnstileSecretKey } =
     await Meta.settings.get("cloudflare-turnstile-captcha");
+
   if (cloudflareTurnstileEnabled !== "on") {
     return;
   }
 
-  const response = await hCaptcha.verify(
-    hCaptchaSecretKey,
-    userData["h-captcha-response"]
-  );
+  // const response = await hCaptcha.verify(
+  //   hCaptchaSecretKey,
+  //   userData["cf-turnstile-response"]
+  // );
+
+  async function heyTurnstile() {
+    return new Promise((resolve, reject) => {
+      const data = new URLSearchParams({
+        secret: turnstileSecretKey,
+        response: userData.body["cf-turnstile-response"],
+        remoteip: userData.ip,
+      });
+
+      const options = {
+        hostname: "challenges.cloudflare.com",
+        path: "/turnstile/v0/siteverify",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      };
+
+      const req = https.request(options, (res) => {
+        let responseData = "";
+
+        res.on("data", (chunk) => {
+          responseData += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            const result = JSON.parse(responseData);
+
+            if (!result.success) {
+              reject(
+                new Error(
+                  "[[cloudflare-turnstile-captcha:captcha-not-verified]]"
+                )
+              );
+            }
+            resolve(result);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+
+      req.on("error", (err) => {
+        reject(err);
+      });
+
+      req.write(data.toString());
+      req.end();
+    });
+  }
+
+  const response = await heyTurnstile();
+
   if (!response.success) {
     throw new Error("[[cloudflare-turnstile-captcha:captcha-not-verified]]");
   }
