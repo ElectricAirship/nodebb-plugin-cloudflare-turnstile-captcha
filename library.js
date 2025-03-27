@@ -17,6 +17,7 @@ pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, "");
 Plugin.nbbId = pluginData.nbbId;
 
 const cloudflareTurnstileArgs = {};
+let pluginSettings = {}; // Add this line to declare pluginSettings
 
 Plugin.middleware = {};
 
