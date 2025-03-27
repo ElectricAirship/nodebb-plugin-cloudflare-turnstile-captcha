@@ -1,2 +1,2 @@
-# nodebb-plugin-cloudflare-turnstyle-captcha
-A security captcha for using Cloudflare's Turnstyle with NodeBB
+# nodebb-plugin-cloudflare-turnstile-captcha
+A security captcha for using Cloudflare's Turnstile with NodeBB
