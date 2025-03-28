@@ -1,5 +1,10 @@
 "use strict";
 
+function grueServerLog(data, title) {
+	console.error(`grueServerLog: ${title}`);
+	console.error(data);	
+}
+
 const https = require("https");
 
 const winston = require.main.require("winston");
@@ -60,18 +65,27 @@ Plugin.load = async function (params) {
     return;
   }
 
+	grueServerLog(null, 'Plugin.Load...');
+
   if (settings.cloudflareTurnstileEnabled === "on") {
     if (settings.turnstileSiteKey && settings.turnstileSecretKey) {
+
+
       cloudflareTurnstileArgs = {
         addLoginRecaptcha: settings.loginTurnstileEnabled === "on",
         publicKey: settings.turnstileSiteKey,
-        targetId: `${pluginData.nbbId}-recaptcha-target`,
+				// The original did stringbuilding
+				// 1. stringbuilding is dumb if other things that reference it arent stringbuilt
+				// 2. stringbuilding is bad because it breaks grepability
+				targetId: `cloudflare-turnstile-captcha-recaptcha-target`, 
         options: {
           theme: "clean",
           hl: (Meta.config.defaultLang || "en").toLowerCase(),
           tabindex: settings.recaptchaTabindex || 0,
         },
       };
+
+			grueServerLog(cloudflareTurnstileArgs, 'Plugin.Load... setting cloudflareTurnstileArgs');
     }
   }
 
@@ -139,6 +153,8 @@ Plugin.appendConfig = async (data) => {
     };
   }
 
+	grueServerLog(cloudflareTurnstileEnabled, 'Plugin.appendConfig... cloudflareTurnstileEnabled');
+
   return data;
 };
 
@@ -165,23 +181,6 @@ Plugin.addCaptcha = async (data) => {
         {
           label: "Captcha",
           html: `<div id="${pluginData.nbbId}-recaptcha-target"></div>`,
-          styleName: pluginData.nbbId,
-        }
-      );
-    }
-  }
-
-  const { cloudflareTurnstileEnabled, logincloudflareTurnstileEnabled } =
-    await Meta.settings.get("cloudflare-turnstile-captcha");
-
-  if (cloudflareTurnstileEnabled === "on") {
-    if (data.templateData) {
-      addCaptchaData(
-        data.templateData,
-        logincloudflareTurnstileEnabled === "on",
-        {
-          label: "CAPTCHA",
-          html: `<div id="h-captcha"></div>`,
           styleName: pluginData.nbbId,
         }
       );

@@ -18,8 +18,10 @@
 	<div class="row m-0">
 		<div id="spy-container" class="col-12 px-0 mb-4" tabindex="0">
 			<ul class="nav nav-tabs mb-3" role="tablist">
-				<li role="presentation" class="nav-item"><a class="nav-link active" href="#recaptcha" aria-controls="recaptcha"
-						role="tab" data-bs-toggle="tab">Cloudflare Turnstile</a></li>
+				<li role="presentation" class="nav-item">
+					<a class="nav-link active" href="#turnstile" aria-controls="turnstile" role="tab"
+						data-bs-toggle="tab">Cloudflare Turnstile</a>
+				</li>
 			</ul>
 
 			<form role="form" class="{nbbId}-settings">
