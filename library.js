@@ -18,7 +18,7 @@ const pluginData = require("./plugin.json");
 
 const Plugin = module.exports;
 
-pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, "");
+pluginData.nbbId = 'cloudflare-turnstile-captcha';
 Plugin.nbbId = pluginData.nbbId;
 
 let cloudflareTurnstileArgs = {};
@@ -60,7 +60,7 @@ Plugin.load = async function (params) {
 
   if (!settings) {
     winston.warn(
-      `[plugins/${pluginData.nbbId}] Settings not set or could not be retrieved!`
+      `[plugins/cloudflare-turnstile-captcha] Settings not set or could not be retrieved!`
     );
     return;
   }
@@ -94,13 +94,13 @@ Plugin.load = async function (params) {
   const routeHelpers = require.main.require("./src/routes/helpers");
   routeHelpers.setupAdminPageRoute(
     params.router,
-    `/admin/plugins/${pluginData.nbbId}`,
+    `/admin/plugins/cloudflare-turnstile-captcha`,
     renderAdmin
   );
 
   // Add the missing handlers for these routes
   params.router.post(
-    `/api/user/:userslug/${pluginData.nbbId}/report`,
+    `/api/user/:userslug/cloudflare-turnstile-captcha/report`,
     [
       Plugin.middleware.isAdminOrGlobalMod,
       Plugin.middleware.cloudflareTurnstileCaptcha,
@@ -116,7 +116,7 @@ Plugin.load = async function (params) {
   );
 
   params.router.post(
-    `/api/user/:username/${pluginData.nbbId}/report/queue`,
+    `/api/user/:username/cloudflare-turnstile-captcha/report/queue`,
     [
       Plugin.middleware.isAdminOrGlobalMod,
       Plugin.middleware.cloudflareTurnstileCaptcha,
@@ -133,10 +133,10 @@ Plugin.load = async function (params) {
 };
 
 async function renderAdmin(req, res) {
-  let akismet = await db.getObject(`${pluginData.nbbId}:akismet`);
+  let akismet = await db.getObject(`cloudflare-turnstile-captcha:akismet`);
 
-  res.render(`admin/plugins/${pluginData.nbbId}`, {
-    nbbId: pluginData.nbbId,
+  res.render(`admin/plugins/cloudflare-turnstile-captcha`, {
+    nbbId: "cloudflare-turnstile-captcha",
     title: "Cloudflare Turnstile Captcha",
   });
 }
@@ -179,9 +179,9 @@ Plugin.addCaptcha = async (data) => {
         data.templateData,
         cloudflareTurnstileArgs.addLoginRecaptcha,
         {
-          label: "Captcha",
-          html: `<div id="${pluginData.nbbId}-recaptcha-target"></div>`,
-          styleName: pluginData.nbbId,
+          label: "Cloudflare Turnstile Captcha",
+          html: `<div id="cloudflare-turnstile-captcha-recaptcha-target"></div>`,
+          styleName: "cloudflare-turnstile-captcha",
         }
       );
     }
@@ -283,7 +283,7 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
 Plugin.admin = {
   menu: function (custom_header, callback) {
     custom_header.plugins.push({
-      route: `/plugins/${pluginData.nbbId}`,
+      route: `/plugins/cloudflare-turnstile-captcha`,
       icon: pluginData.faIcon,
       name: pluginData.name,
     });
