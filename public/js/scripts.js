@@ -16,7 +16,9 @@ $(function () {
   window.onloadTurnstileCallback = function () {
     turnstile.render(`#${ajaxify.data.cloudflareTurnstileArgs.targetId}`, {
       sitekey: ajaxify.data.cloudflareTurnstileArgs.publicKey,
-      callback: function (token) {},
+      callback: function (token) {
+        console.log("token", token);
+      },
     });
   };
 

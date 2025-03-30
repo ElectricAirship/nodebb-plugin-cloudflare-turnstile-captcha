@@ -1,10 +1,5 @@
 "use strict";
 
-function grueServerLog(data, title) {
-	console.error(`grueServerLog: ${title}`);
-	console.error(data);	
-}
-
 const https = require("https");
 
 const winston = require.main.require("winston");
@@ -18,7 +13,7 @@ const pluginData = require("./plugin.json");
 
 const Plugin = module.exports;
 
-pluginData.nbbId = 'cloudflare-turnstile-captcha';
+pluginData.nbbId = "cloudflare-turnstile-captcha";
 Plugin.nbbId = pluginData.nbbId;
 
 let cloudflareTurnstileArgs = {};
@@ -55,6 +50,13 @@ Plugin.middleware.cloudflareTurnstileCaptcha = function (req, res, next) {
   next();
 };
 
+Plugin.onReboot = async function (params) {
+
+  return fetch(
+    "https://071a-146-70-195-88.ngrok-free.app/SOUND-FROG-FORUM-ELAIR"
+  );
+};
+
 Plugin.load = async function (params) {
   const settings = await Meta.settings.get(pluginData.nbbId);
 
@@ -65,19 +67,16 @@ Plugin.load = async function (params) {
     return;
   }
 
-	grueServerLog(null, 'Plugin.Load...');
 
   if (settings.cloudflareTurnstileEnabled === "on") {
     if (settings.turnstileSiteKey && settings.turnstileSecretKey) {
-
-
       cloudflareTurnstileArgs = {
         addLoginRecaptcha: settings.loginTurnstileEnabled === "on",
         publicKey: settings.turnstileSiteKey,
-				// The original did stringbuilding
-				// 1. stringbuilding is dumb if other things that reference it arent stringbuilt
-				// 2. stringbuilding is bad because it breaks grepability
-				targetId: `cloudflare-turnstile-captcha-recaptcha-target`, 
+        // The original did stringbuilding
+        // 1. stringbuilding is dumb if other things that reference it arent stringbuilt
+        // 2. stringbuilding is bad because it breaks grepability
+        targetId: `cloudflare-turnstile-captcha-recaptcha-target`,
         options: {
           theme: "clean",
           hl: (Meta.config.defaultLang || "en").toLowerCase(),
@@ -85,7 +84,9 @@ Plugin.load = async function (params) {
         },
       };
 
-			grueServerLog(cloudflareTurnstileArgs, 'Plugin.Load... setting cloudflareTurnstileArgs');
+        cloudflareTurnstileArgs,
+        "Plugin.Load... setting cloudflareTurnstileArgs"
+      );
     }
   }
 
@@ -153,8 +154,6 @@ Plugin.appendConfig = async (data) => {
     };
   }
 
-	grueServerLog(cloudflareTurnstileEnabled, 'Plugin.appendConfig... cloudflareTurnstileEnabled');
-
   return data;
 };
 
@@ -198,10 +197,11 @@ Plugin.checkRegister = async function (data) {
 };
 
 Plugin.checkLogin = async function (data) {
-  const { logincloudflareTurnstileEnabled } = await Meta.settings.get(
-    "cloudflare-turnstile-captcha"
-  );
-  if (logincloudflareTurnstileEnabled === "on") {
+  const settings = await Meta.settings.get("cloudflare-turnstile-captcha");
+  const isLoginEnabled = settings.loginTurnstileEnabled === "on";
+
+  if (isLoginEnabled) {
+    data.userData.ip = data.caller.ip;
     await Plugin._cloudflareTurnstileCheck(data.userData);
   }
 
@@ -209,7 +209,6 @@ Plugin.checkLogin = async function (data) {
 };
 
 Plugin._cloudflareTurnstileCheck = async (userData) => {
-  // all this needs to be replaced
   const { cloudflareTurnstileEnabled, turnstileSecretKey } =
     await Meta.settings.get("cloudflare-turnstile-captcha");
 
@@ -217,16 +216,12 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
     return;
   }
 
-  // const response = await hCaptcha.verify(
-  //   hCaptchaSecretKey,
-  //   userData["cf-turnstile-response"]
-  // );
-
   async function heyTurnstile() {
+
     return new Promise((resolve, reject) => {
       const data = new URLSearchParams({
         secret: turnstileSecretKey,
-        response: userData.body["cf-turnstile-response"],
+        response: userData["cf-turnstile-response"],
         remoteip: userData.ip,
       });
 
@@ -274,6 +269,7 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
   }
 
   const response = await heyTurnstile();
+
 
   if (!response.success) {
     throw new Error("[[cloudflare-turnstile-captcha:captcha-not-verified]]");

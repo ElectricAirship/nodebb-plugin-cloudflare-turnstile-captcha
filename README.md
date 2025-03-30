@@ -31,7 +31,7 @@ A security captcha for using Cloudflare's Turnstile with NodeBB
 ## TODO
 
 - [x] Registration verification
-- [ ] Login verification
+- [x] Login verification
 - [ ] Admin page review
 - - [ ] toggle on/off
 - - [ ] review all i18n strings

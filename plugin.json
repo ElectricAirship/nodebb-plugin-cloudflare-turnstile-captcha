@@ -49,13 +49,12 @@
 			"priority": 5
 		},
 		{
-			"hook": "filter:user.getRegistrationQueue",
-			"method": "getRegistrationQueue",
-			"priority": 5
-		},
-		{
 			"hook": "filter:config.get",
 			"method": "appendConfig"
+		},
+		{
+			"hook": "action:nodebb.ready",
+			"method": "onReboot"
 		}
 	],
 	"faIcon": "fa-shield"
