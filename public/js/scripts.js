@@ -14,16 +14,24 @@ $(function () {
   }
 
   window.onloadTurnstileCallback = function () {
-    turnstile.render(`#${ajaxify.data.cloudflareTurnstileArgs.targetId}`, {
-      sitekey: ajaxify.data.cloudflareTurnstileArgs.publicKey,
-      callback: function (token) {
-        console.log("token", token);
-      },
-    });
+    if (
+      ajaxify.data.cloudflareTurnstileArgs &&
+      ajaxify.data.cloudflareTurnstileArgs.featureOn
+    ) {
+      turnstile.render(`#${ajaxify.data.cloudflareTurnstileArgs.targetId}`, {
+        sitekey: ajaxify.data.cloudflareTurnstileArgs.publicKey,
+        callback: function (token) {
+          console.log("token", token);
+        },
+      });
+    }
   };
 
   function onRegisterPage() {
-    if (ajaxify.data.cloudflareTurnstileArgs) {
+    if (
+      ajaxify.data.cloudflareTurnstileArgs &&
+      ajaxify.data.cloudflareTurnstileArgs.featureOn
+    ) {
       ensureCloudflareTurnstileCaptchaThenCreate();
     }
   }
@@ -31,7 +39,8 @@ $(function () {
   function onLoginPage() {
     if (
       ajaxify.data.cloudflareTurnstileArgs &&
-      ajaxify.data.cloudflareTurnstileArgs.addLoginRecaptcha
+      ajaxify.data.cloudflareTurnstileArgs.featureOn &&
+      ajaxify.data.cloudflareTurnstileArgs.enableOnLoginPage
     ) {
       ensureCloudflareTurnstileCaptchaThenCreate();
     }
@@ -83,12 +92,6 @@ $(function () {
         break;
       case "login":
         onLoginPage(data);
-        break;
-      case "account/profile":
-        onAccountProfilePage(data);
-        break;
-      case "admin/manage/registration":
-        onManageRegistrationPage(data);
         break;
     }
   });

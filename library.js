@@ -16,7 +16,7 @@ const Plugin = module.exports;
 pluginData.nbbId = "cloudflare-turnstile-captcha";
 Plugin.nbbId = pluginData.nbbId;
 
-let cloudflareTurnstileArgs = {};
+let cloudflareTurnstileArgs = { featureOn: false };
 let pluginSettings = {}; // Add this line to declare pluginSettings
 
 Plugin.middleware = {};
@@ -50,12 +50,8 @@ Plugin.middleware.cloudflareTurnstileCaptcha = function (req, res, next) {
   next();
 };
 
-Plugin.onReboot = async function (params) {
-
-  return fetch(
-    "https://071a-146-70-195-88.ngrok-free.app/SOUND-FROG-FORUM-ELAIR"
-  );
-};
+// Only for plugin development iteration
+// Plugin.onReboot = async function (params) {};
 
 Plugin.load = async function (params) {
   const settings = await Meta.settings.get(pluginData.nbbId);
@@ -67,11 +63,11 @@ Plugin.load = async function (params) {
     return;
   }
 
-
   if (settings.cloudflareTurnstileEnabled === "on") {
     if (settings.turnstileSiteKey && settings.turnstileSecretKey) {
       cloudflareTurnstileArgs = {
-        addLoginRecaptcha: settings.loginTurnstileEnabled === "on",
+        featureOn: true,
+        enableOnLoginPage: settings.loginTurnstileEnabled === "on",
         publicKey: settings.turnstileSiteKey,
         // The original did stringbuilding
         // 1. stringbuilding is dumb if other things that reference it arent stringbuilt
@@ -83,10 +79,6 @@ Plugin.load = async function (params) {
           tabindex: settings.recaptchaTabindex || 0,
         },
       };
-
-        cloudflareTurnstileArgs,
-        "Plugin.Load... setting cloudflareTurnstileArgs"
-      );
     }
   }
 
@@ -171,12 +163,12 @@ Plugin.addCaptcha = async (data) => {
     }
   }
 
-  if (cloudflareTurnstileArgs) {
+  if (cloudflareTurnstileArgs && cloudflareTurnstileArgs.featureOn) {
     if (data.templateData) {
       data.templateData.cloudflareTurnstileArgs = cloudflareTurnstileArgs;
       addCaptchaData(
         data.templateData,
-        cloudflareTurnstileArgs.addLoginRecaptcha,
+        cloudflareTurnstileArgs.enableOnLoginPage,
         {
           label: "Cloudflare Turnstile Captcha",
           html: `<div id="cloudflare-turnstile-captcha-recaptcha-target"></div>`,
@@ -217,7 +209,6 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
   }
 
   async function heyTurnstile() {
-
     return new Promise((resolve, reject) => {
       const data = new URLSearchParams({
         secret: turnstileSecretKey,
@@ -269,7 +260,6 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
   }
 
   const response = await heyTurnstile();
-
 
   if (!response.success) {
     throw new Error("[[cloudflare-turnstile-captcha:captcha-not-verified]]");
