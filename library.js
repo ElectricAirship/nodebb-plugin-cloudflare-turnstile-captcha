@@ -11,6 +11,41 @@ const pluginData = require("./plugin.json");
 
 const Plugin = module.exports;
 
+function grueServerLog(data, title) {
+  console.log(`grueServerLog ${title}`, data);
+}
+function grueFileLog(jsonObject) {
+  grueServerLog(jsonObject, "grueFileLog");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const filename = `../nodebb-plugin-cloudflare-turnstile-captcha/logs/grue-${timestamp}.json`;
+
+  // Handle circular references during stringify
+  const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular Reference]";
+        }
+        seen.add(value);
+      }
+      return value;
+    };
+  };
+
+  grueServerLog(filename, "grueFileLog - writing");
+  try {
+    const fs = require("fs");
+    const jsonString = JSON.stringify(jsonObject, getCircularReplacer(), 2);
+    fs.writeFileSync(filename, jsonString, "utf8");
+
+    return filename;
+  } catch (err) {
+    console.error("Failed to write log file:", err);
+    return null;
+  }
+}
+
 pluginData.nbbId = "cloudflare-turnstile-captcha";
 Plugin.nbbId = pluginData.nbbId;
 
@@ -69,6 +104,8 @@ Plugin.onReboot = async function (params) {
       console.error(err);
     })
     .end();
+
+  grueFileLog({ ribbit: "croak" });
 };
 
 Plugin.load = async function (params) {
