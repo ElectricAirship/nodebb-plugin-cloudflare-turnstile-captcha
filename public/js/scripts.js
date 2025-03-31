@@ -23,7 +23,7 @@ $(function () {
       turnstile.render(`#${ajaxify.data.cloudflareTurnstileArgs.targetId}`, {
         sitekey: ajaxify.data.cloudflareTurnstileArgs.publicKey,
         callback: function (token) {
-          console.log("token", token);
+          // console.log("token", token);
         },
       });
     }
