@@ -3,10 +3,8 @@
 const https = require("https");
 
 const winston = require.main.require("winston");
-const nconf = require.main.require("nconf");
 const Meta = require.main.require("./src/meta");
 const User = require.main.require("./src/user");
-const Topics = require.main.require("./src/topics");
 const db = require.main.require("./src/database");
 
 const pluginData = require("./plugin.json");
