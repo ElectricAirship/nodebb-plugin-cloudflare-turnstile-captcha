@@ -92,27 +92,25 @@ Plugin.middleware.cloudflareTurnstileCaptcha = function (req, res, next) {
 
 // Only for plugin development iteration
 Plugin.onReboot = async function (params) {
-  https
-    .request(
-      "https://071a-146-70-195-88.ngrok-free.app/SOUND-FROG-FORUM-ELAIR",
-      {
-        method: "GET",
-      },
-      (res) => {
-        res.on("data", (chunk) => {
-          // console.log(`BODY: ${chunk}`);
-        });
-        res.on("end", () => {
-          // console.log("No more data in response.");
-        });
-      }
-    )
-    .on("error", (err) => {
-      console.error(err);
-    })
-    .end();
-
-  grueFileLog({ ribbit: "croak" });
+  // https
+  //   .request(
+  //     "https://071a-146-70-195-88.ngrok-free.app/SOUND-FROG-FORUM-ELAIR",
+  //     {
+  //       method: "GET",
+  //     },
+  //     (res) => {
+  //       res.on("data", (chunk) => {
+  //         // console.log(`BODY: ${chunk}`);
+  //       });
+  //       res.on("end", () => {
+  //         // console.log("No more data in response.");
+  //       });
+  //     }
+  //   )
+  //   .on("error", (err) => {
+  //     console.error(err);
+  //   })
+  //   .end();
 };
 
 Plugin.load = async function (params) {
