@@ -12,11 +12,11 @@ const pluginData = require("./plugin.json");
 const Plugin = module.exports;
 
 function grueServerLog(data, title) {
-  console.log(`grueServerLog ${title}`, data);
+  // console.log(`grueServerLog ${title}`, data);
 }
-function grueFileLog(jsonObject) {
-  grueServerLog(jsonObject, "grueFileLog");
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+function grueFileLog(jsonObject, title) {
+  /*
+	const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const filename = `../nodebb-plugin-cloudflare-turnstile-captcha/logs/grue-${timestamp}.json`;
 
   // Handle circular references during stringify
@@ -33,7 +33,13 @@ function grueFileLog(jsonObject) {
     };
   };
 
-  grueServerLog(filename, "grueFileLog - writing");
+  if (jsonObject) {
+    grueServerLog(filename, `grueFileLog - writing ${title}`);
+  } else {
+    grueServerLog(null, `grueFileLog - was passed NULL data for ${title}`);
+    return;
+  }
+
   try {
     const fs = require("fs");
     const jsonString = JSON.stringify(jsonObject, getCircularReplacer(), 2);
@@ -44,6 +50,7 @@ function grueFileLog(jsonObject) {
     console.error("Failed to write log file:", err);
     return null;
   }
+	*/
 }
 
 pluginData.nbbId = "cloudflare-turnstile-captcha";
@@ -237,9 +244,8 @@ Plugin.addCaptcha = async (data) => {
 };
 
 Plugin.checkRegister = async function (data) {
-  await Promise.all([
-    Plugin._cloudflareTurnstileCheck(data.req, data.userData),
-  ]);
+  // await Promise.all([Plugin._cloudflareTurnstileCheck(data.req, "register")]);
+  await Plugin._cloudflareTurnstileCheck(data.userData, "register");
   return data;
 };
 
@@ -248,27 +254,30 @@ Plugin.checkLogin = async function (data) {
   const isLoginEnabled = settings.loginTurnstileEnabled === "on";
 
   if (isLoginEnabled) {
-    data.userData.ip = data.caller.ip;
-    await Plugin._cloudflareTurnstileCheck(data.userData);
+    await Plugin._cloudflareTurnstileCheck(data.userData, "login");
   }
 
   return data;
 };
 
-Plugin._cloudflareTurnstileCheck = async (userData) => {
+Plugin._cloudflareTurnstileCheck = async (cfData, where) => {
+  grueFileLog(cfData, `Plugin._cloudflareTurnstileCheck - ${where}`);
   const { cloudflareTurnstileEnabled, turnstileSecretKey } =
     await Meta.settings.get("cloudflare-turnstile-captcha");
+
+  grueServerLog(cloudflareTurnstileEnabled, `cloudflareTurnstileEnabled`);
 
   if (cloudflareTurnstileEnabled !== "on") {
     return;
   }
 
   async function heyTurnstile() {
+    grueServerLog(null, `about to call turnstyle`);
     return new Promise((resolve, reject) => {
       const data = new URLSearchParams({
         secret: turnstileSecretKey,
-        response: userData["cf-turnstile-response"],
-        remoteip: userData.ip,
+        response: cfData["cf-turnstile-response"],
+        remoteip: cfData.ip,
       });
 
       const options = {
@@ -284,14 +293,17 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
         let responseData = "";
 
         res.on("data", (chunk) => {
+          grueServerLog(null, `ts - onData`);
           responseData += chunk;
         });
 
         res.on("end", () => {
+          grueServerLog(null, `ts - onEnd`);
           try {
             const result = JSON.parse(responseData);
 
             if (!result.success) {
+              grueServerLog(result, `ts - noSuccess`);
               reject(
                 new Error(
                   "[[cloudflare-turnstile-captcha:captcha-not-verified]]"
@@ -306,6 +318,7 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
       });
 
       req.on("error", (err) => {
+        grueServerLog(err, `ts - onError`);
         reject(err);
       });
 
@@ -315,6 +328,7 @@ Plugin._cloudflareTurnstileCheck = async (userData) => {
   }
 
   const response = await heyTurnstile();
+  grueServerLog(response, `turnstyle said...`);
 
   if (!response.success) {
     throw new Error("[[cloudflare-turnstile-captcha:captcha-not-verified]]");
