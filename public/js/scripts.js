@@ -10,10 +10,12 @@ $(function () {
       injectScript(
         "//challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"
       );
+    } else {
+      renderWidget();
     }
   }
 
-  window.onloadTurnstileCallback = function () {
+  function renderWidget() {
     if (
       ajaxify.data.cloudflareTurnstileArgs &&
       ajaxify.data.cloudflareTurnstileArgs.featureOn
@@ -25,6 +27,10 @@ $(function () {
         },
       });
     }
+  }
+
+  window.onloadTurnstileCallback = function () {
+    renderWidget();
   };
 
   function onRegisterPage() {
